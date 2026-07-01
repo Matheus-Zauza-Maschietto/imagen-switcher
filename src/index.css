@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Outfit", system-ui, sans-serif;
+  
+  --color-glass-dark: rgba(15, 23, 42, 0.65);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-border-glow: rgba(139, 92, 246, 0.3);
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-violet-500/30 selection:text-violet-200 overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(2, 6, 23, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-900/50;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700/50 rounded-full hover:bg-slate-600/70 transition-colors;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  @apply bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl shadow-xl transition-all duration-300;
+}
+
+.glass-panel-hover {
+  @apply hover:border-violet-500/25 hover:shadow-violet-500/5 hover:shadow-2xl;
+}
+
+/* Custom glowing effects */
+.glow-border-active {
+  @apply border border-violet-500/40 shadow-[0_0_15px_rgba(139,92,246,0.15)];
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 font-display;
+}
+
+.text-gradient-purple {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400;
+}
+
+/* Custom checkerboard pattern for transparent SVG previews */
+.checkerboard-bg {
+  background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%),
+                    linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #1e293b 75%),
+                    linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: #0f172a;
+}
