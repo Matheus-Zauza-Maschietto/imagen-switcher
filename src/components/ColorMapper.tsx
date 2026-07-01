@@ -5,6 +5,7 @@ interface ColorMapperProps {
   detectedColors: string[];
   replacementMap: Record<string, string[]>;
   setReplacementMap: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+  totalCombinations: number;
 }
 
 // Preset color palettes
@@ -35,7 +36,12 @@ const PRESETS = [
   },
 ];
 
-export default function ColorMapper({ detectedColors, replacementMap, setReplacementMap }: ColorMapperProps) {
+export default function ColorMapper({
+  detectedColors,
+  replacementMap,
+  setReplacementMap,
+  totalCombinations,
+}: ColorMapperProps) {
   const [newColorInputs, setNewColorInputs] = useState<Record<string, string>>({});
   const [activePicker, setActivePicker] = useState<string | null>(null);
 
@@ -98,11 +104,7 @@ export default function ColorMapper({ detectedColors, replacementMap, setReplace
     });
   };
 
-  // Calculate combinations
-  const totalCombinations = detectedColors.reduce((acc, color) => {
-    const optionsCount = replacementMap[color]?.length || 1;
-    return acc * optionsCount;
-  }, 1);
+
 
   return (
     <div className="space-y-6">

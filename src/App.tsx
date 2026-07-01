@@ -62,8 +62,10 @@ export default function App() {
   };
 
   // Generate Cartesian Product of options
-  const variations: SvgVariation[] = useMemo(() => {
-    if (!svgContent || detectedColors.length === 0) return [];
+  const { variations, totalCombinations } = useMemo(() => {
+    if (!svgContent || detectedColors.length === 0) {
+      return { variations: [], totalCombinations: 0 };
+    }
 
     // Collect arrays of choices
     const choices = detectedColors.map(color => replacementMap[color] || [color]);
@@ -79,11 +81,18 @@ export default function App() {
 
     const combinations = getCartesian(choices);
 
-    // Limit combinations to 500 for safety
-    const maxCombinations = Math.min(combinations.length, 500);
-    const limitedCombos = combinations.slice(0, maxCombinations);
+    // Filter out combinations that have duplicate colors (meaning two original colors map to the same replacement color)
+    const validCombinations = combinations.filter(
+      combo => new Set(combo).size === combo.length
+    );
 
-    return limitedCombos.map((combo, index) => {
+    const totalCount = validCombinations.length;
+
+    // Limit combinations to 500 for safety
+    const maxCombinations = Math.min(totalCount, 500);
+    const limitedCombos = validCombinations.slice(0, maxCombinations);
+
+    const generatedVariations = limitedCombos.map((combo, index) => {
       // Build replacement map for this variation
       const currentMap: Record<string, string> = {};
       detectedColors.forEach((color, idx) => {
@@ -101,6 +110,11 @@ export default function App() {
         colorMap: currentMap,
       };
     });
+
+    return {
+      variations: generatedVariations,
+      totalCombinations: totalCount,
+    };
   }, [svgContent, detectedColors, replacementMap, exportPrefix]);
 
   // Sync selectedIds with variations when variations count changes
@@ -265,6 +279,7 @@ export default function App() {
                 detectedColors={detectedColors}
                 replacementMap={replacementMap}
                 setReplacementMap={setReplacementMap}
+                totalCombinations={totalCombinations}
               />
 
               {/* Export Panel Options */}

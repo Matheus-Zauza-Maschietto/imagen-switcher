@@ -137,6 +137,13 @@ export function extractColorsFromSvg(svgText: string): string[] {
       const norm = normalizeColor(m);
       if (norm) colors.add(norm);
     });
+
+    // Other color functions (display-p3, oklch, oklab, etc.)
+    const funcMatches = text.match(/\b(color|oklch|oklab|lab|lch|hwb)\([^)]+\)/gi) || [];
+    funcMatches.forEach((m) => {
+      const norm = normalizeColor(m);
+      if (norm) colors.add(norm);
+    });
   });
 
   // Sort colors by hue (rough visual sort) or hex string
@@ -176,6 +183,15 @@ function replaceColorsInCss(cssText: string, colorMap: Record<string, string>): 
     return match;
   });
 
+  // Replace color functions (display-p3, oklch, oklab, etc.)
+  updatedCss = updatedCss.replace(/\b(color|oklch|oklab|lab|lch|hwb)\([^)]+\)/gi, (match) => {
+    const norm = normalizeColor(match);
+    if (norm && colorMap[norm]) {
+      return colorMap[norm];
+    }
+    return match;
+  });
+
   return updatedCss;
 }
 
@@ -197,21 +213,27 @@ export function replaceColorsInSvg(svgText: string, colorMap: Record<string, str
   const colorAttrs = ['fill', 'stroke', 'stop-color', 'flood-color', 'color'];
 
   elements.forEach((el) => {
+    const propertyReplacements: Record<string, string> = {};
+
+    // 1. Check presentation attributes
     colorAttrs.forEach((attr) => {
       const val = el.getAttribute(attr);
       if (val) {
         const norm = normalizeColor(val);
         if (norm && colorMap[norm]) {
-          el.setAttribute(attr, colorMap[norm]);
+          const replacement = colorMap[norm];
+          el.setAttribute(attr, replacement);
+          propertyReplacements[attr] = replacement;
         }
       }
     });
 
-    // Handle inline style attributes
+    // 2. Check inline style attributes
     const style = el.getAttribute('style');
     if (style) {
       const declarations = style.split(';');
-      const updatedDecs = declarations.map((dec) => {
+      // Find style-defined color replacements
+      declarations.forEach((dec) => {
         const index = dec.indexOf(':');
         if (index > 0) {
           const prop = dec.slice(0, index).trim();
@@ -219,8 +241,19 @@ export function replaceColorsInSvg(svgText: string, colorMap: Record<string, str
           if (colorAttrs.includes(prop)) {
             const norm = normalizeColor(val);
             if (norm && colorMap[norm]) {
-              return `${prop}: ${colorMap[norm]}`;
+              propertyReplacements[prop] = colorMap[norm];
             }
+          }
+        }
+      });
+
+      // Update style declarations using propertyReplacements
+      const updatedDecs = declarations.map((dec) => {
+        const index = dec.indexOf(':');
+        if (index > 0) {
+          const prop = dec.slice(0, index).trim();
+          if (colorAttrs.includes(prop) && propertyReplacements[prop]) {
+            return `${prop}: ${propertyReplacements[prop]}`;
           }
         }
         return dec;
