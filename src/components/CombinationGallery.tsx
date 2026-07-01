@@ -115,10 +115,11 @@ export default function CombinationGallery({
             >
               {/* Preview Box */}
               <div className="checkerboard-bg aspect-square relative flex items-center justify-center p-6 border-b border-white/5 select-none">
-                {/* SVG Render */}
-                <div
-                  className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
-                  dangerouslySetInnerHTML={{ __html: item.svgContent }}
+                {/* SVG Render (isolated via image source to prevent global CSS collisions) */}
+                <img
+                  src={`data:image/svg+xml;utf8,${encodeURIComponent(item.svgContent)}`}
+                  alt={item.filename}
+                  className="w-full h-full object-contain pointer-events-none"
                 />
 
                 {/* Card hover Overlay actions */}
@@ -263,9 +264,10 @@ export default function CombinationGallery({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               {/* Preview Panel */}
               <div className="checkerboard-bg aspect-square rounded-2xl border border-white/5 p-8 flex items-center justify-center">
-                <div
-                  className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
-                  dangerouslySetInnerHTML={{ __html: previewItem.svgContent }}
+                <img
+                  src={`data:image/svg+xml;utf8,${encodeURIComponent(previewItem.svgContent)}`}
+                  alt={previewItem.filename}
+                  className="w-full h-full object-contain pointer-events-none"
                 />
               </div>
 

@@ -168,9 +168,10 @@ export default function UploadZone({ onSvgLoaded, svgContent, fileName, onClear 
         <div className="glass-panel p-5 bg-slate-900/20 border-white/5 flex flex-col md:flex-row gap-5 items-center justify-between">
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="checkerboard-bg w-16 h-16 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center p-2 shrink-0">
-              <div
-                className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
-                dangerouslySetInnerHTML={{ __html: svgContent }}
+              <img
+                src={`data:image/svg+xml;utf8,${encodeURIComponent(svgContent)}`}
+                alt={fileName || 'original-svg'}
+                className="w-full h-full object-contain pointer-events-none"
               />
             </div>
             
