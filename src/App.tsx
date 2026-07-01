@@ -6,6 +6,7 @@ import UploadZone from './components/UploadZone';
 import ColorMapper from './components/ColorMapper';
 import CombinationGallery from './components/CombinationGallery';
 import { extractColorsFromSvg, replaceColorsInSvg } from './utils/svgColorParser';
+import { convertSvgToRaster } from './utils/imageConverter';
 
 interface SvgVariation {
   id: string;
@@ -158,7 +159,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Download selected variations in a ZIP file
+  // Download selected variations in a ZIP file containing svgs, pngs, and jpgs folders
   const handleZipExport = async () => {
     if (selectedIds.size === 0) return;
 
@@ -167,14 +168,38 @@ export default function App() {
 
     try {
       const zip = new JSZip();
+
+      // Create directories inside the zip file
+      const svgsFolder = zip.folder("svgs")!;
+      const pngsFolder = zip.folder("pngs")!;
+      const jpgsFolder = zip.folder("jpgs")!;
+
       const selectedItems = variations.filter(v => selectedIds.has(v.id));
+      const totalItems = selectedItems.length;
 
-      selectedItems.forEach(item => {
-        zip.file(item.filename, item.svgContent);
-      });
+      for (let i = 0; i < totalItems; i++) {
+        const item = selectedItems[i];
 
+        // 1. Store the original SVG
+        svgsFolder.file(item.filename, item.svgContent);
+
+        // 2. Convert SVG content to raster PNG & JPEG and save in respective folders
+        const raster = await convertSvgToRaster(item.svgContent);
+        if (raster) {
+          const pngName = item.filename.replace(/\.svg$/i, '.png');
+          pngsFolder.file(pngName, raster.pngBlob);
+
+          const jpgName = item.filename.replace(/\.svg$/i, '.jpg');
+          jpgsFolder.file(jpgName, raster.jpgBlob);
+        }
+
+        // Conversion progress takes the first 50% of the overall progress
+        setZipProgress(Math.round(((i + 1) / totalItems) * 50));
+      }
+
+      // 3. Compress ZIP package (remaining 50% of the progress)
       const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
-        setZipProgress(Math.round(metadata.percent));
+        setZipProgress(50 + Math.round(metadata.percent / 2));
       });
 
       const url = URL.createObjectURL(zipBlob);
@@ -189,6 +214,7 @@ export default function App() {
       console.error('Failed to create ZIP package:', err);
     } finally {
       setIsZipping(false);
+      setZipProgress(0);
     }
   };
 
