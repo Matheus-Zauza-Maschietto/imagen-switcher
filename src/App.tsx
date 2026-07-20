@@ -25,7 +25,7 @@ export default function App() {
   const [replacementMap, setReplacementMap] = useState<Record<string, string[]>>({});
 
   // Export options
-  const [exportPrefix, setExportPrefix] = useState<string>('variation');
+  const [exportPrefix, setExportPrefix] = useState<string>('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Zipping states
@@ -36,10 +36,7 @@ export default function App() {
   const handleSvgLoaded = (content: string, name: string) => {
     setSvgContent(content);
     
-    // Clean name for prefix default
-    const baseName = name.replace(/\.svg$/i, '');
     setFileName(name);
-    setExportPrefix(`${baseName}-swapped`);
 
     // Extract colors
     const colors = extractColorsFromSvg(content);
@@ -59,6 +56,7 @@ export default function App() {
     setFileName(null);
     setDetectedColors([]);
     setReplacementMap({});
+    setExportPrefix('');
     setSelectedIds(new Set());
   };
 
@@ -102,7 +100,10 @@ export default function App() {
 
       // Replace colors in the SVG content
       const modifiedSvg = replaceColorsInSvg(svgContent, currentMap);
-      const variationName = `${exportPrefix}-${index + 1}.svg`;
+      const colorsName = combo
+        .map(color => color.replace(/^#/, '').toLowerCase())
+        .join('_');
+      const variationName = `${exportPrefix ? `${exportPrefix}_` : ''}${colorsName}.svg`;
 
       return {
         id: `var-${index}`,
@@ -318,17 +319,20 @@ export default function App() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      File Naming Prefix
+                      Prefix
                     </label>
                     <input
                       type="text"
                       value={exportPrefix}
                       onChange={(e) => setExportPrefix(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
-                      placeholder="e.g. logo-variant"
+                      placeholder="e.g. icon"
                       className="w-full bg-slate-950 border border-slate-800 focus:border-violet-500/50 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-mono"
                     />
                     <span className="text-[10px] text-slate-500 mt-1 block">
-                      Files will download as <code className="text-slate-400">{exportPrefix || 'hueswitch'}-1.svg</code>, <code className="text-slate-400">{exportPrefix || 'hueswitch'}-2.svg</code>, etc.
+                      Files will download as{' '}
+                      <code className="text-slate-400">
+                        {exportPrefix ? `${exportPrefix}_` : ''}000000_ffffff.svg
+                      </code>
                     </span>
                   </div>
                 </div>
