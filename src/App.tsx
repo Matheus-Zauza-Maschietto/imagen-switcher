@@ -171,9 +171,9 @@ export default function App() {
       const zip = new JSZip();
 
       // Create directories inside the zip file
-      const svgsFolder = zip.folder("svgs")!;
-      const pngsFolder = zip.folder("pngs")!;
-      const jpgsFolder = zip.folder("jpgs")!;
+      const svgsFolder = zip.folder("SVGs")!;
+      const pngsFolder = zip.folder("PNGs")!;
+      const jpgsFolder = zip.folder("JPGs")!;
 
       const selectedItems = variations.filter(v => selectedIds.has(v.id));
       const totalItems = selectedItems.length;
